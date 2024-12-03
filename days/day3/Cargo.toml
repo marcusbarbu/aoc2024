@@ -1,14 +1,11 @@
 [package]
-name = "aoc2024"
+name = "day3"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = [ 
-    "days/day*"
-]
-
 [dependencies]
-dotenvy = "0.15.7"
+dotenvy = "*"
+aoc2024 = {path = "../../"}
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
+regex = "1.11.1"
