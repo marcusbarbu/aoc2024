@@ -1,0 +1,10 @@
+[package]
+name = "day2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dotenvy = "*"
+aoc2024 = {path = "../../"}
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
