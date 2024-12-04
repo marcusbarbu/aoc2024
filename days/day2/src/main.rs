@@ -16,7 +16,7 @@ impl Day2A {
             raw: s.clone(),
             rows: Vec::new(),
             a: Vec::new(),
-            b: Vec::new()
+            b: Vec::new(),
         }
     }
 
@@ -40,7 +40,7 @@ impl Day2A {
             let new_dir = *cur_row > last;
             if dir.is_some() && new_dir != dir.unwrap() {
                 // error!("Direction changed during row: {:?}", row);
-                return Some(index)
+                return Some(index);
             }
             dir = Some(new_dir);
             let diff = last.abs_diff(*cur_row);
@@ -51,7 +51,7 @@ impl Day2A {
                 }
                 _ => {
                     // error!("Diff {} in row {:?} is too large", diff, row);
-                    return Some(index)
+                    return Some(index);
                 }
             }
         }
@@ -63,7 +63,7 @@ impl Day2A {
             let unsafe_idx = Day2A::get_row_unsafe_index(row);
             match unsafe_idx {
                 Some(_) => acc,
-                None => acc+1
+                None => acc + 1,
             }
         });
         res
@@ -72,42 +72,40 @@ impl Day2A {
     pub fn get_semi_safe_rows(&mut self) -> i32 {
         let mut safe = Vec::new();
         let res = self.rows.iter().fold(0, |acc, row| {
-                let base = row.clone();
-                let unsafe_idx = Day2A::get_row_unsafe_index(row);
-                if unsafe_idx.is_none(){
-                    safe.push(row.clone());
-                    return acc + 1;
-                }
-                else {
-                    let unsafe_idx = unsafe_idx.unwrap();
-                    for i in unsafe_idx - 1 .. unsafe_idx + 2 {
-                        info!("i is {} unsafe was {}", i, unsafe_idx);
-                        let mut test_row = base.clone();
-                        test_row.remove(i);
-                        let ans = Day2A::get_row_unsafe_index(&test_row);
-                        if ans.is_none(){
-                            safe.push(test_row);
-                            return acc + 1
-                        }
+            let base = row.clone();
+            let unsafe_idx = Day2A::get_row_unsafe_index(row);
+            if unsafe_idx.is_none() {
+                safe.push(row.clone());
+                return acc + 1;
+            } else {
+                let unsafe_idx = unsafe_idx.unwrap();
+                for i in unsafe_idx - 1..unsafe_idx + 2 {
+                    info!("i is {} unsafe was {}", i, unsafe_idx);
+                    let mut test_row = base.clone();
+                    test_row.remove(i);
+                    let ans = Day2A::get_row_unsafe_index(&test_row);
+                    if ans.is_none() {
+                        safe.push(test_row);
+                        return acc + 1;
                     }
                 }
-                acc
             }
-        );
+            acc
+        });
         self.a = safe;
         res
     }
 
-    fn single_brute_force(row: &Vec<i32>) -> bool{
+    fn single_brute_force(row: &Vec<i32>) -> bool {
         let base = row.clone();
-        if Day2A::get_row_unsafe_index(row).is_none(){
+        if Day2A::get_row_unsafe_index(row).is_none() {
             return true;
         }
 
-        for i in 0..row.len(){
+        for i in 0..row.len() {
             let mut cur = base.clone();
             cur.remove(i);
-            if Day2A::get_row_unsafe_index(&cur).is_none(){
+            if Day2A::get_row_unsafe_index(&cur).is_none() {
                 return true;
             }
         }
@@ -118,7 +116,7 @@ impl Day2A {
     pub fn forget_it_brute_force_it(&mut self) -> i32 {
         let mut succ = Vec::new();
         let res = self.rows.iter().fold(0, |acc, row| {
-            if Day2A::single_brute_force(row){
+            if Day2A::single_brute_force(row) {
                 succ.push(row.clone());
                 return acc + 1;
             }
@@ -142,7 +140,6 @@ impl Day2A {
         let diff = b_hash.difference(&a_hash);
         info!("Diff: len {} {:?}", diff.clone().count(), diff);
     }
-
 }
 
 fn main() {

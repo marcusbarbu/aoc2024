@@ -61,8 +61,12 @@ impl Day3 {
                     info!("Found nums {:?}", c);
                     self.muls.push(c);
                 }
-                [_, "do", _] => {allowed = true;}
-                [_, _, "don't"] => {allowed = false;}
+                [_, "do", _] => {
+                    allowed = true;
+                }
+                [_, _, "don't"] => {
+                    allowed = false;
+                }
                 [_, _, _] => {}
             }
         }
