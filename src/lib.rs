@@ -42,6 +42,7 @@ impl AocHelper {
             .with_thread_ids(true)
             .with_thread_names(true)
             .with_ansi(true)
+            // .pretty()
             .finish();
 
         let _ = tracing::subscriber::set_global_default(subscriber);
