@@ -7,7 +7,7 @@ use tracing::{debug, error, info};
 #[derive(Clone, Debug)]
 struct Equation {
     total: usize,
-    operands: VecDeque<usize>
+    operands: VecDeque<usize>,
 }
 
 #[derive(Clone, Debug)]
@@ -15,14 +15,13 @@ enum Operator {
     Add,
     Mul,
     Concat,
-    Start
-
+    Start,
 }
 
 #[derive(Debug)]
 struct Day7 {
     raw: String,
-    equations: Vec<Equation>
+    equations: Vec<Equation>,
 }
 
 fn solve_equation(round: usize, current: usize, target: usize, numbers: VecDeque<usize>) -> bool {
@@ -30,9 +29,8 @@ fn solve_equation(round: usize, current: usize, target: usize, numbers: VecDeque
         let mut next_nums: VecDeque<usize> = numbers.clone();
         let val = next_nums.pop_front().unwrap();
         return solve_equation(round + 1, val, target, next_nums);
-
     }
-    if current == target && numbers.len() == 0{
+    if current == target && numbers.len() == 0 {
         return true;
     }
 
@@ -47,7 +45,6 @@ fn solve_equation(round: usize, current: usize, target: usize, numbers: VecDeque
 
     return add_ans || mul_ans;
 }
-
 
 fn concat(a: usize, b: usize) -> usize {
     let mut power_of_ten: usize = 0;
@@ -66,15 +63,20 @@ fn concat(a: usize, b: usize) -> usize {
     return mathy;
 }
 
-fn solve_equation_concat(round: usize, current: usize, target: usize, numbers: VecDeque<usize>, my_op: Operator) -> Option<Vec<Operator>> {
+fn solve_equation_concat(
+    round: usize,
+    current: usize,
+    target: usize,
+    numbers: VecDeque<usize>,
+    my_op: Operator,
+) -> Option<Vec<Operator>> {
     if round == 0 {
         let mut next_nums: VecDeque<usize> = numbers.clone();
         let val = next_nums.pop_front().unwrap();
         return solve_equation_concat(round + 1, val, target, next_nums, Operator::Start);
-
     }
-    if current == target && numbers.len() == 0{
-        let v = vec!(my_op);
+    if current == target && numbers.len() == 0 {
+        let v = vec![my_op];
         return Some(v);
     }
 
@@ -84,9 +86,27 @@ fn solve_equation_concat(round: usize, current: usize, target: usize, numbers: V
 
     let mut next_nums: VecDeque<usize> = numbers.clone();
     let val = next_nums.pop_front().unwrap();
-    let add_ans = solve_equation_concat(round + 1, current + val, target, next_nums.clone(), Operator::Add);
-    let mul_ans = solve_equation_concat(round + 1, current * val, target, next_nums.clone(), Operator::Mul);
-    let concat_ans = solve_equation_concat(round + 1, concat(current, val), target, next_nums, Operator::Concat);
+    let add_ans = solve_equation_concat(
+        round + 1,
+        current + val,
+        target,
+        next_nums.clone(),
+        Operator::Add,
+    );
+    let mul_ans = solve_equation_concat(
+        round + 1,
+        current * val,
+        target,
+        next_nums.clone(),
+        Operator::Mul,
+    );
+    let concat_ans = solve_equation_concat(
+        round + 1,
+        concat(current, val),
+        target,
+        next_nums,
+        Operator::Concat,
+    );
 
     let answers = [add_ans, mul_ans, concat_ans];
     let best = answers.iter().find(|ans| ans.is_some());
@@ -100,13 +120,11 @@ fn solve_equation_concat(round: usize, current: usize, target: usize, numbers: V
     None
 }
 
-
-
 impl Day7 {
     pub fn new(s: &String) -> Self {
         Self {
             raw: s.clone(),
-            equations: Vec::new()
+            equations: Vec::new(),
         }
     }
 
@@ -119,9 +137,7 @@ impl Day7 {
                 operands.push_back(num.parse::<usize>().unwrap());
             });
 
-            self.equations.push(Equation{
-                total, operands
-            })
+            self.equations.push(Equation { total, operands })
         });
     }
 
@@ -137,19 +153,16 @@ impl Day7 {
     pub fn get_part2_answer(&mut self) -> usize {
         let mut fail_count = 0;
         let ans = self.equations.iter().fold(0, |acc, eq| {
-
-            if solve_equation(0, 0, eq.total, eq.operands.clone()){
+            if solve_equation(0, 0, eq.total, eq.operands.clone()) {
                 return acc + eq.total;
-            }
-
-            else {
-                let concat_ans = solve_equation_concat(0, 0, eq.total, eq.operands.clone(), Operator::Start);
-                if concat_ans.is_some(){
+            } else {
+                let concat_ans =
+                    solve_equation_concat(0, 0, eq.total, eq.operands.clone(), Operator::Start);
+                if concat_ans.is_some() {
                     debug!("Had to call concat");
                     debug!("Ans: {:?}", concat_ans.unwrap());
                     return acc + eq.total;
-                }
-                else {
+                } else {
                     fail_count += 1;
                 }
             }
@@ -159,8 +172,6 @@ impl Day7 {
         info!("Failed {fail_count} lines");
         return ans;
     }
-
-
 }
 
 fn main() {

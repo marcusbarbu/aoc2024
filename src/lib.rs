@@ -4,6 +4,10 @@ use std::path::PathBuf;
 
 use tracing::{error, info, Level};
 
+pub mod counter;
+pub mod graph;
+pub mod map_vec_extend;
+
 #[derive(Debug, Clone)]
 pub enum RequestedAocInputType {
     Real,
@@ -37,8 +41,8 @@ impl fmt::Display for AocHelperError {
 impl AocHelper {
     fn setup_logging() {
         let subscriber = tracing_subscriber::FmtSubscriber::builder()
-            .with_max_level(Level::DEBUG)
-            // .with_max_level(Level::INFO)
+            // .with_max_level(Level::DEBUG)
+            .with_max_level(Level::INFO)
             .with_thread_ids(true)
             .with_thread_names(true)
             .with_ansi(true)

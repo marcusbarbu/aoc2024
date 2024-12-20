@@ -62,6 +62,136 @@ dependencies = [
 ]
 
 [[package]]
+name = "day10"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day11"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day12"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day13"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day14"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day15"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day16"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day17"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day18"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day19"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "day2"
 version = "0.1.0"
 dependencies = [
@@ -134,6 +264,32 @@ dependencies = [
 
 [[package]]
 name = "day8"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day9"
+version = "0.1.0"
+dependencies = [
+ "aoc2024",
+ "diagonal",
+ "dotenvy",
+ "rayon",
+ "regex",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "day9b"
 version = "0.1.0"
 dependencies = [
  "aoc2024",

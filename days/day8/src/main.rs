@@ -11,16 +11,16 @@ struct Day8 {
     num_rows: usize,
     num_cols: usize,
     antinodes: BTreeSet<Point>,
-    freqs: BTreeMap<char, Frequency>
+    freqs: BTreeMap<char, Frequency>,
 }
 
 type Point = (i32, i32);
-type PointPair = ((i32, i32),(i32, i32));
+type PointPair = ((i32, i32), (i32, i32));
 
 #[derive(Debug)]
 struct Frequency {
     name: char,
-    arms: Vec<FrequencyArms>
+    arms: Vec<FrequencyArms>,
 }
 
 #[derive(Debug)]
@@ -28,10 +28,10 @@ struct FrequencyArms {
     root: Point,
     first_point: Point,
     potential_points: Vec<Point>,
-    antinode_points: Vec<Point>
+    antinode_points: Vec<Point>,
 }
 
-impl  Day8 {
+impl Day8 {
     pub fn new(s: &String) -> Self {
         Self {
             raw: s.clone(),
@@ -39,14 +39,17 @@ impl  Day8 {
             num_cols: 0,
             num_rows: 0,
             antinodes: BTreeSet::new(),
-            freqs: BTreeMap::new()
+            freqs: BTreeMap::new(),
         }
     }
 
     // TODO: put this in the library
     fn append_to_mapping(btm: &mut BTreeMap<char, Vec<(i32, i32)>>, k: char, v: (i32, i32)) {
         match btm.get_mut(&k) {
-            Some(vv) => {vv.push(v); vv.sort()},
+            Some(vv) => {
+                vv.push(v);
+                vv.sort()
+            }
             None => {
                 let mut new_vec = Vec::new();
                 new_vec.push(v);
@@ -55,27 +58,31 @@ impl  Day8 {
         }
     }
 
-    pub fn parse(&mut self){
+    pub fn parse(&mut self) {
         let mut mr = 0;
         let mut mc = 0;
         for (row, line) in self.raw.lines().into_iter().enumerate() {
-            for (col, c) in line.chars().enumerate(){
+            for (col, c) in line.chars().enumerate() {
                 if c.is_ascii_alphanumeric() {
-                    Day8::append_to_mapping(&mut self.antenna_locations, c, (row as i32, col as i32));
+                    Day8::append_to_mapping(
+                        &mut self.antenna_locations,
+                        c,
+                        (row as i32, col as i32),
+                    );
                 }
                 mc = col;
             }
             mr = row;
         }
-        self.num_cols = mc+1;
+        self.num_cols = mc + 1;
         self.num_rows = mr + 1;
     }
 
-    fn generate_pairs(v: &Vec<(i32, i32)>) -> Vec<((i32, i32), (i32, i32))>{
+    fn generate_pairs(v: &Vec<(i32, i32)>) -> Vec<((i32, i32), (i32, i32))> {
         let mut out = Vec::new();
-        for i in 0..v.len(){
+        for i in 0..v.len() {
             let first = v[i];
-            for last in i+1..v.len() {
+            for last in i + 1..v.len() {
                 let second = v[last];
                 let pair = (first, second);
                 out.push(pair);
@@ -93,7 +100,7 @@ impl  Day8 {
         diffsq.sqrt()
     }
 
-    fn possible_points_on_line(num_rows: usize, num_cols: usize, p: PointPair) -> Vec<(i32, i32)>{
+    fn possible_points_on_line(num_rows: usize, num_cols: usize, p: PointPair) -> Vec<(i32, i32)> {
         let root = p.0;
         let first_point = p.1;
 
@@ -128,11 +135,11 @@ impl  Day8 {
     }
 
     pub fn build_frequencies(&mut self) {
-        self.antenna_locations.iter().for_each(|(signal,loc_vec)|{
+        self.antenna_locations.iter().for_each(|(signal, loc_vec)| {
             let mut pairs = Day8::generate_pairs(loc_vec);
             let mut freq: Frequency = Frequency {
                 name: *signal,
-                arms: Vec::new()
+                arms: Vec::new(),
             };
             debug!("Pairs for {signal}: {:?}", pairs);
 
@@ -142,7 +149,7 @@ impl  Day8 {
                     root: ele.0,
                     first_point: ele.1,
                     potential_points: points,
-                    antinode_points: Vec::new()
+                    antinode_points: Vec::new(),
                 };
                 freq.arms.push(fa);
             }
@@ -154,21 +161,24 @@ impl  Day8 {
         let mut universal_antinodes: BTreeSet<Point> = BTreeSet::new();
         self.freqs.iter().for_each(|(key, freq)| {
             for arm in freq.arms.iter() {
-                // let arm_antinodes: Vec<(i32,i32)> = 
-                arm.potential_points.iter().filter_map(|point| {
-                    let root_dist = Day8::distance(*point, arm.root);
-                    let fp_dist = Day8::distance(*point, arm.first_point);
-                    let greatest = root_dist.max(fp_dist);
-                    let least = root_dist.min(fp_dist);
-                    let good = greatest == (least * 2.0);
-                    debug!("Greatest {greatest} least {least}: {good}");
-                    if good {
-                        return Some((point.0, point.1));
-                    }
-                    None
-                }).for_each(|p| {
-                    universal_antinodes.insert(p);
-                });
+                // let arm_antinodes: Vec<(i32,i32)> =
+                arm.potential_points
+                    .iter()
+                    .filter_map(|point| {
+                        let root_dist = Day8::distance(*point, arm.root);
+                        let fp_dist = Day8::distance(*point, arm.first_point);
+                        let greatest = root_dist.max(fp_dist);
+                        let least = root_dist.min(fp_dist);
+                        let good = greatest == (least * 2.0);
+                        debug!("Greatest {greatest} least {least}: {good}");
+                        if good {
+                            return Some((point.0, point.1));
+                        }
+                        None
+                    })
+                    .for_each(|p| {
+                        universal_antinodes.insert(p);
+                    });
                 // debug!("Arm antinodes: {:?}", arm_antinodes);
             }
         });
@@ -176,7 +186,7 @@ impl  Day8 {
     }
 
     pub fn get_total_line_points(&self) -> BTreeSet<Point> {
-        let mut out: BTreeSet<Point> =BTreeSet::new();
+        let mut out: BTreeSet<Point> = BTreeSet::new();
 
         self.freqs.iter().for_each(|(name, freq)| {
             freq.arms.iter().for_each(|arm| {
@@ -191,7 +201,6 @@ impl  Day8 {
         out
     }
 }
-
 
 fn main() {
     let aoc: AocHelper = AocHelper::new(8, None);
