@@ -41,11 +41,11 @@ impl fmt::Display for AocHelperError {
 impl AocHelper {
     fn setup_logging() {
         let subscriber = tracing_subscriber::FmtSubscriber::builder()
-            // .with_max_level(Level::DEBUG)
             .with_max_level(Level::INFO)
+            .with_max_level(Level::DEBUG)
             .with_thread_ids(true)
             .with_thread_names(true)
-            .with_ansi(true)
+            .with_ansi(false)
             // .pretty()
             .finish();
 

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
-use aoc2024::{counter::Counter, AocHelper, RequestedAocInputType};
+use aoc2024::{counter::BTreeCounter, AocHelper, RequestedAocInputType};
 use tracing::{debug, error, info};
 use tracing_subscriber::fmt::format;
 
@@ -135,13 +135,13 @@ impl Day11 {
 #[derive(Debug)]
 struct D11Part2 {
     raw: String,
-    stones: Counter<usize>,
+    stones: BTreeCounter<usize>,
 }
 impl D11Part2 {
     pub fn new(s: &String) -> Self {
         Self {
             raw: s.clone(),
-            stones: Counter::new(),
+            stones: BTreeCounter::new(),
         }
     }
 
@@ -166,7 +166,7 @@ impl D11Part2 {
     }
 
     pub fn single_step(&mut self) {
-        let mut new_counter: Counter<usize> = Counter::new();
+        let mut new_counter: BTreeCounter<usize> = BTreeCounter::new();
         self.stones.iter().for_each(|(stone_number, count)| {
             let rep = stone_number.to_string();
             let mut new_number;
