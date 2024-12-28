@@ -1,7 +1,7 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::HashSet;
 
 use aoc2024::{
-    graph::{self, Graph, SCORE_MAX},
+    graph::{Graph, SCORE_MAX},
     AocHelper, RequestedAocInputType,
 };
 use tracing::{debug, info};

@@ -1,7 +1,7 @@
-use std::{borrow::Borrow, collections::HashSet};
+use std::collections::HashSet;
 
 use aoc2024::{AocHelper, RequestedAocInputType};
-use tracing::{debug, error, info};
+use tracing::info;
 
 struct Day2A {
     raw: String,

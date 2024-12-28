@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{BTreeMap, BTreeSet},
+    collections::BTreeSet,
     fmt::Display,
     fs::{File, OpenOptions},
     io::Write,

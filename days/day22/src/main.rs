@@ -1,9 +1,7 @@
-use std::collections::{HashMap, VecDeque};
-use std::hash::Hash;
+use std::collections::HashMap;
 
 use aoc2024::{AocHelper, RequestedAocInputType};
 use itertools::Itertools;
-use itertools::TupleWindows;
 use tracing::{debug, info};
 
 const PRUNE_CONST: i64 = 16777216 - 1;
@@ -111,22 +109,22 @@ fn main() {
         .get_input_as_string(RequestedAocInputType::Real)
         .unwrap();
 
-    let mut d22 = Day22::new(&test_input);
+    let d22 = Day22::new(&test_input);
     debug!("{:?}", d22);
     let ans = d22.get_2kth_numbers();
     info!("Ans: {ans}");
 
-    let mut d22 = Day22::new(&real_input);
+    let d22 = Day22::new(&real_input);
     debug!("{:?}", d22);
     let ans = d22.get_2kth_numbers();
     info!("Ans: {ans}");
 
-    let mut d22 = Day22::new(&test_input);
+    let d22 = Day22::new(&test_input);
     debug!("{:?}", d22);
     let ans = d22.get_best_score();
     info!("Ans: {}", ans);
 
-    let mut d22 = Day22::new(&real_input);
+    let d22 = Day22::new(&real_input);
     debug!("{:?}", d22);
     let ans = d22.get_best_score();
     info!("Ans: {}", ans);

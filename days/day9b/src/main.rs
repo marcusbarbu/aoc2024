@@ -1,11 +1,4 @@
-use std::{
-    borrow::BorrowMut,
-    cell::{Ref, RefCell},
-    cmp::Reverse,
-    collections::{BTreeMap, BTreeSet, BinaryHeap},
-    rc::Rc,
-    thread::AccessError,
-};
+use std::collections::{BTreeSet, BinaryHeap};
 
 use aoc2024::{AocHelper, RequestedAocInputType};
 use tracing::{debug, info};
@@ -277,7 +270,7 @@ impl Day9 {
             if block.filled {
                 let mut block_score: usize = 0;
                 for i in block.start_idx..block.start_idx + block.len {
-                    block_score += (i * block.id);
+                    block_score += i * block.id;
                 }
                 total += block_score;
             }

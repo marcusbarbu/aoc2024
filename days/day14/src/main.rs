@@ -1,10 +1,9 @@
-use std::{collections::BTreeMap, thread::sleep, time::Duration};
+use std::collections::BTreeMap;
 
 use aoc2024::{map_vec_extend::append_to_mapping, AocHelper, RequestedAocInputType};
-use rayon::iter::{IntoParallelRefIterator, Map};
+use rayon::iter::IntoParallelRefIterator;
 use regex::Regex;
 use tracing::{debug, info};
-use tracing_subscriber::field::debug;
 
 use rayon::prelude::*;
 

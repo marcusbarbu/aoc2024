@@ -1,13 +1,9 @@
-use std::{
-    collections::{HashMap, HashSet},
-    path,
-};
+use std::collections::{HashMap, HashSet};
 
 use aoc2024::{
-    map_vec_extend::{append_to_hash_map, append_to_hash_set},
+    map_vec_extend::append_to_hash_set,
     AocHelper, RequestedAocInputType,
 };
-use dotenvy::from_path_iter;
 use itertools::{repeat_n, Itertools};
 use rayon::prelude::*;
 use tracing::{debug, info};
@@ -198,7 +194,7 @@ impl Keypad {
     pub fn get_paths_internal(&self, a: char, b: char) -> Vec<String> {
         debug!("looking for {a} {b}");
         let options = self.paths.get(&(a, b)).unwrap();
-        let mut oo = options.clone();
+        let oo = options.clone();
         // let mut oo: Vec<Vec<Direction>> =
         // oo.sort_by(|a, b| {
         //     a.len().cmp(&b.len())
@@ -297,8 +293,8 @@ impl Day21 {
         }
         let with_start = "A".to_string() + path;
         let steps = with_start.chars().tuple_windows::<(char, char)>();
-        let mut set_of_bests: Vec<String> = Vec::new();
-        let mut option_sets: Vec<HashSet<String>> = Vec::new();
+        let set_of_bests: Vec<String> = Vec::new();
+        let option_sets: Vec<HashSet<String>> = Vec::new();
         let mut total = 0;
         for step in steps {
             // let step_option_set =

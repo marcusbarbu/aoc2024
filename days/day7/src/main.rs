@@ -1,8 +1,7 @@
-use core::num;
 use std::collections::VecDeque;
 
 use aoc2024::{AocHelper, RequestedAocInputType};
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 
 #[derive(Clone, Debug)]
 struct Equation {

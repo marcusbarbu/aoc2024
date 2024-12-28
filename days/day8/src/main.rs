@@ -136,7 +136,7 @@ impl Day8 {
 
     pub fn build_frequencies(&mut self) {
         self.antenna_locations.iter().for_each(|(signal, loc_vec)| {
-            let mut pairs = Day8::generate_pairs(loc_vec);
+            let pairs = Day8::generate_pairs(loc_vec);
             let mut freq: Frequency = Frequency {
                 name: *signal,
                 arms: Vec::new(),

@@ -24,15 +24,19 @@ pub struct AocHelper {
 #[derive(Debug, Clone)]
 pub enum AocHelperError {
     FileReadError,
+    TimeoutError,
 }
 
-type AocResult<T> = std::result::Result<T, AocHelperError>;
+pub type AocResult<T> = std::result::Result<T, AocHelperError>;
 
 impl fmt::Display for AocHelperError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
             AocHelperError::FileReadError => {
                 write!(f, "File read error! Could not read file!")
+            }
+            AocHelperError::TimeoutError => {
+                write!(f, "Timed out!!")
             }
         }
     }
@@ -41,11 +45,13 @@ impl fmt::Display for AocHelperError {
 impl AocHelper {
     fn setup_logging() {
         let subscriber = tracing_subscriber::FmtSubscriber::builder()
-            .with_max_level(Level::INFO)
+            // .with_max_level(Level::ERROR)
+            // .with_max_level(Level::INFO)
             .with_max_level(Level::DEBUG)
             .with_thread_ids(true)
             .with_thread_names(true)
             .with_ansi(false)
+            .with_ansi(true)
             // .pretty()
             .finish();
 

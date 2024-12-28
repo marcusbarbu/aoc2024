@@ -34,7 +34,7 @@ impl<T: Hash + Eq + Copy + Clone + core::fmt::Debug + Ord> Graph<T> {
             return false;
         }
 
-        let mut working_map: &mut HashMap<T, i32>;
+        let working_map: &mut HashMap<T, i32>;
         if !self.edges.contains_key(dp_start) {
             self.edges.insert(dp_start.clone(), HashMap::new());
         }

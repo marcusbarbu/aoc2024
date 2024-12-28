@@ -1,6 +1,6 @@
 use aoc2024::{AocHelper, RequestedAocInputType};
 use regex::Regex;
-use tracing::{debug, error, info};
+use tracing::{error, info};
 
 type Button = (i64, i64);
 type Point = (i64, i64);
@@ -38,7 +38,7 @@ impl SysEq {
         let ratio = ((ax / tx) - (ay / ty)) / ((by / ty) - (bx / tx));
         // debug!("Ratio is {ratio}");
 
-        let solve_a: f64 = (tx / (ax + (bx * ratio)));
+        let solve_a: f64 = tx / (ax + (bx * ratio));
         let solve_b: f64 = solve_a * ratio;
         // debug!("a is {solve_a} b is {solve_b}");
 

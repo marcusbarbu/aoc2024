@@ -1,6 +1,6 @@
 use std::{
     collections::{BTreeMap, VecDeque},
-    ops::{Div, Index},
+    ops::Div,
     usize,
 };
 

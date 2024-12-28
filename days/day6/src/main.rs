@@ -3,7 +3,6 @@ use std::collections::BTreeSet;
 use aoc2024::{AocHelper, RequestedAocInputType};
 use rayon::prelude::*;
 use tracing::{debug, info};
-use tracing_subscriber::filter::combinator::Or;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 enum Orientation {

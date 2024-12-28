@@ -1,8 +1,6 @@
-use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
 use aoc2024::{counter::BTreeCounter, AocHelper, RequestedAocInputType};
 use tracing::{debug, error, info};
-use tracing_subscriber::fmt::format;
 
 // struct TreeNode {
 //     val: usize,
@@ -169,7 +167,7 @@ impl D11Part2 {
         let mut new_counter: BTreeCounter<usize> = BTreeCounter::new();
         self.stones.iter().for_each(|(stone_number, count)| {
             let rep = stone_number.to_string();
-            let mut new_number;
+            let new_number;
             if *stone_number == 0 {
                 new_number = 1;
                 new_counter.add_n(new_number, *count);

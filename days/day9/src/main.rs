@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, cmp::Reverse, collections::BTreeMap};
+use std::{borrow::BorrowMut, collections::BTreeMap};
 
 use aoc2024::{AocHelper, RequestedAocInputType};
 use tracing::{debug, info};
@@ -51,7 +51,7 @@ impl Day9 {
         for (i, num) in self.start_state.iter().enumerate() {
             let contents: i128;
             if i % 2 == 0 {
-                contents = (i as i128 / 2);
+                contents = i as i128 / 2;
                 self.total_occupied += *num as i128;
                 self.file_list.push((contents as usize, *num as usize));
                 let b = Block {
@@ -102,7 +102,7 @@ impl Day9 {
             start += 1;
         }
 
-        let mut new_occupied: i128 = 0;
+        let new_occupied: i128 = 0;
         let vc: String = working_array
             .iter()
             .map(|val| {
@@ -165,7 +165,7 @@ impl Day9 {
         // then go through all file blocks in reverse order, try to match them with appropriate free blocks
         // replace a free block with a new file block and a free block if necessary
         // recalculate by using stored index info in the block structs
-        let mut free_counts: BTreeMap<usize, Vec<Block>> = BTreeMap::new();
+        let free_counts: BTreeMap<usize, Vec<Block>> = BTreeMap::new();
 
         let mut working_block_list = self.block_list.clone();
 

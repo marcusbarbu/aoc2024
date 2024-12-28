@@ -1,10 +1,7 @@
-use std::{
-    collections::{HashMap, HashSet},
-    hash::Hash,
-};
+use std::collections::{HashMap, HashSet};
 
 use aoc2024::{
-    counter::{BTreeCounter, HashMapCounter},
+    counter::HashMapCounter,
     map_vec_extend::append_to_hash_set,
     AocHelper, RequestedAocInputType,
 };

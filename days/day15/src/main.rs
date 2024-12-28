@@ -1,12 +1,6 @@
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    ops::Add,
-};
+use std::collections::BTreeMap;
 
-use aoc2024::{AocHelper, RequestedAocInputType};
-use p1::p1;
 use p2::p2;
-use tracing::{debug, info};
 
 // type Point = (i32, i32);
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]

@@ -2,7 +2,7 @@ use rayon::prelude::*;
 use std::collections::{BTreeMap, BTreeSet};
 
 use aoc2024::{
-    map_vec_extend::{self, append_to_mapping, append_to_mapping_set},
+    map_vec_extend::{append_to_mapping_set},
     AocHelper, RequestedAocInputType,
 };
 use tracing::{debug, info};

@@ -1,10 +1,7 @@
-use std::{
-    collections::{BTreeMap, HashMap, HashSet},
-    hash::Hash,
-};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use aoc2024::{
-    counter::BTreeCounter, graph::Graph, map_vec_extend::append_to_mapping, AocHelper,
+    counter::BTreeCounter, map_vec_extend::append_to_mapping, AocHelper,
     RequestedAocInputType,
 };
 use tracing::{debug, info};

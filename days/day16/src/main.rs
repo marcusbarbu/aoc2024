@@ -1,13 +1,10 @@
 use std::{
-    cmp::Reverse,
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet},
     hash::Hash,
     i32,
 };
 
 use aoc2024::{AocHelper, RequestedAocInputType};
-use dotenvy::var;
-use rayon::option;
 use tracing::{debug, error, info};
 
 const SCORE_MAX: i32 = 1_000_000_000;
@@ -118,7 +115,7 @@ impl Graph {
             return false;
         }
 
-        let mut working_map: &mut HashMap<DirPoint, i32>;
+        let working_map: &mut HashMap<DirPoint, i32>;
         if !self.edges.contains_key(dp_start) {
             self.edges.insert(dp_start.clone(), HashMap::new());
         }
@@ -433,7 +430,7 @@ impl Day16 {
             );
         }
 
-        let mut final_scores: Vec<i32> = variants
+        let final_scores: Vec<i32> = variants
             .iter()
             .map(|var| *distances.get(var).unwrap_or(&SCORE_MAX))
             .collect();

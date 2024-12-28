@@ -222,8 +222,8 @@ fn single_step(x: BruteInt) -> (BruteInt, BruteInt) {
 const brute_ans: [BruteInt; 16] = [2, 4, 1, 2, 7, 5, 1, 7, 4, 4, 0, 3, 5, 5, 3, 0];
 
 fn brute_force() {
-    let start: BruteInt = (1 << 16);
-    let mut answers: Vec<BruteInt> = Vec::new();
+    let start: BruteInt = 1 << 16;
+    let answers: Vec<BruteInt> = Vec::new();
     ((1 as BruteInt) << 45..((1 as BruteInt) << 63))
         .into_par_iter()
         .for_each(|x| {
@@ -235,7 +235,7 @@ fn brute_force() {
                 if brute_ans[i] != res {
                     return;
                 }
-                if (follow == 0) {
+                if follow == 0 {
                     info!("Answer could be {x}, i: {i} res {res}");
                 }
                 i += 1;

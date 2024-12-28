@@ -1,7 +1,7 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::BTreeMap;
 
 use aoc2024::{map_vec_extend::append_to_mapping, AocHelper, RequestedAocInputType};
-use tracing::{debug, error, info, Level};
+use tracing::{debug, error, info};
 
 #[derive(Debug)]
 struct Day19 {
@@ -22,7 +22,7 @@ impl Day19 {
     }
 
     pub fn parse(&mut self) {
-        let (mut pieces, mut targets) = self.raw.split_once("\n\n").unwrap();
+        let (pieces, targets) = self.raw.split_once("\n\n").unwrap();
         pieces.split(", ").for_each(|p| {
             let fc = p.chars().next().unwrap();
             append_to_mapping(&mut self.pieces, fc, p.to_string());

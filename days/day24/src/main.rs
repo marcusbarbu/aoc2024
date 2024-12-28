@@ -1,18 +1,20 @@
+use std::error::Error;
+use std::hash::Hash;
 use std::io::prelude::*;
 use std::{
     borrow::BorrowMut,
     cell::RefCell,
     collections::{HashMap, HashSet},
     fs::File,
-    hash::Hash,
 };
 
-use aoc2024::{AocHelper, RequestedAocInputType};
-use itertools::{concat, Itertools};
+use aoc2024::map_vec_extend::append_to_hash_map;
+use aoc2024::{AocHelper, AocHelperError, AocResult, RequestedAocInputType};
+use itertools::Itertools;
 use regex::Regex;
 use tracing::{debug, error, info};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum WireCombo {
     Static { value: bool },
     Or { a: String, b: String },
@@ -20,7 +22,7 @@ enum WireCombo {
     Xor { a: String, b: String },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct SingleOutput {
     name: String,
     predecessors: WireCombo,
@@ -176,8 +178,8 @@ impl Day24 {
                 error!("Tried to calculate result with missing value for {z}");
                 continue;
             };
-            if (tf) {
-                output |= (1 << i);
+            if tf {
+                output |= 1 << i;
             }
         }
         output
@@ -195,18 +197,29 @@ impl Day24 {
                 error!("Tried to calculate result with missing value for {z}");
                 continue;
             };
-            if (tf) {
-                output |= (1 << i);
+            if tf {
+                output |= 1 << i;
             }
         }
         output
     }
 
-    pub fn solve_p1(&mut self) -> u128 {
+    pub fn solve_p1(&mut self) -> AocResult<u128 >{
+        let mut last = 0;
+        let mut consec = 0;
         while self.missing_count > 0 {
             self.single_step();
+            if self.missing_count == last {
+                consec += 1;
+            }
+            last = self.missing_count;
+
+            if consec >= 20 {
+                return Err(AocHelperError::TimeoutError);
+            }
+
         }
-        self.get_res()
+        Ok(self.get_res())
     }
 
     pub fn check_layers(&self) {
@@ -217,16 +230,32 @@ impl Day24 {
         }
     }
 
-    pub fn correct_output(&mut self) {
+    pub fn swap(&mut self, a_name: &str, b_name: &str) {
+        let a_val = self.gates.get(a_name).unwrap().clone();
+        let b_val = self.gates.get(b_name).unwrap().clone();
+        self.gates.remove(a_name);
+        self.gates.remove(b_name);
+
+        self.gates.insert(a_name.to_string(), b_val);
+        self.gates.insert(b_name.to_string(), a_val);
+    }
+
+    pub fn correct_output(&mut self)->bool {
         let x_val = self.calc_value("x");
         let y_val = self.calc_value("y");
 
         let correct = x_val + y_val;
-        let calced = self.solve_p1();
+        let Ok(calced) = self.solve_p1() else {
+            error!("didn't complete");
+            return false;};
 
         info!("Correct: {correct} calced: {calced}");
         let delta = correct ^ calced;
+        if delta == 0 {
+            return true;
+        }
         info!("Wrong bits: {:#32X?}", delta);
+        false
     }
 
     pub fn find_inputs(
@@ -238,10 +267,10 @@ impl Day24 {
             return out.clone();
         };
         let mut out: HashSet<String> = HashSet::new();
-        let mut cur_name = key.to_string();
+        let cur_name = key.to_string();
 
         let mut to_check: HashSet<String> = HashSet::new();
-        let mut cur_point = self.gates.get(key).unwrap().borrow();
+        let cur_point = self.gates.get(key).unwrap().borrow();
         match &cur_point.predecessors {
             WireCombo::Static { value } => {
                 out.insert(cur_name.clone());
@@ -322,10 +351,22 @@ impl Day24 {
         let ys = self.get_by_name_in_order("y");
         let zs = self.get_by_name_in_order("z");
 
-        let mut xv: Vec<String> = Vec::new();
-        lines.push(format!("{}", xs.join("\n")));
-        lines.push(format!("{}", ys.join("\n")));
-        lines.push(format!("{}", zs.join("\n")));
+        let xv: Vec<String> = Vec::new();
+        lines.push(format!("
+subgraph {{
+    rank = \"same\"
+
+{}
+{}
+    }}", xs.join("\n"), ys.join("\n")));
+
+        // lines.push(format!("{}", ys.join("\n")));
+        lines.push(format!("
+subgraph {{
+    rank = \"same\"
+
+{}
+    }}", zs.join("\n")));
 
         for (key, gate) in self.gates.iter() {
             let mut ins: Vec<String> = Vec::new();
@@ -399,6 +440,7 @@ impl Day24 {
             if ins.len() == 0 {
                 continue;
             }
+            ins.sort();
             if ins.iter().all(|s| s.starts_with("x") || s.starts_with("y")) {
                 let new_name = format!("{}_{}_{}", ins[0], name_base, ins[1]);
                 out_net_to_logical.insert(name.clone(), new_name.clone());
@@ -408,19 +450,309 @@ impl Day24 {
         (out_net_to_logical, out_logical_to_net)
     }
 
-    pub fn work_from_z1(&self, ntl: &HashMap<String, String>) {
+    pub fn calculate_cins(&self, ntl: &HashMap<String, String>) -> (HashMap<String, String>, HashMap<String, String>, Vec<String>) {
+        let mut original_name_to_cin: HashMap<String, String> = HashMap::new();
+        let mut cin_to_original_name: HashMap<String, String> = HashMap::new();
         let zs = self.get_by_name_in_order("z");
         let mut ziter = zs.iter();
         ziter.next();
 
         let mut of_concern: Vec<String> = Vec::new();
-        for z in ziter {
+        for (i, z) in ziter.enumerate() {
+            debug!("z: {} i: {}", z, i);
             let z_gate = &self.gates.get(z).unwrap().borrow().predecessors;
-            // match z_gate {
+            let a_s: String;
+            let b_s: String;
+            match z_gate {
+                WireCombo::Xor { a, b } => {
+                    a_s = a.clone();
+                    b_s = b.clone();
+                }
+                _ => {
+                    of_concern.push(z.clone());
+                    continue;
+                }
+            }
+            debug!("{} or {}", a_s, b_s);
+            let should_be_cin_leg: String;
+            let target = &format!("x{:0>2}_XOR_y{:0>2}", i+1, i+1);
+            let a_is_xor_leg = ntl.get(&a_s).is_some() && ntl.get(&a_s).unwrap() == target;
+            let b_is_xor_leg = ntl.get(&b_s).is_some() && ntl.get(&b_s).unwrap() == target;
+            if a_is_xor_leg && b_is_xor_leg {
+                of_concern.push(z.clone());
+                error!("Weird on {z}");
+                continue;
+            }
+            else if a_is_xor_leg {
+                should_be_cin_leg = b_s;
+            }
+            else if b_is_xor_leg {
+                should_be_cin_leg = a_s;
+            }
+            else {
+                of_concern.push(z.clone());
+                error!("Z {z} has no xor leg");
+                continue;
+            }
+            let cin_name = format!("CIN_{:0>2}", i+1);
+            original_name_to_cin.insert(should_be_cin_leg.clone(), cin_name.clone());
+            cin_to_original_name.insert(cin_name.clone(), should_be_cin_leg.clone());
+        }
+        error!("Of concern: {:?}", of_concern);
 
-            // }
+        (original_name_to_cin, cin_to_original_name, of_concern)
+    }
+
+    pub fn find_intermediate_ands(&self, cins: &HashMap<String, String>, xor_ands: &HashMap<String, String>) -> (HashMap<String,String> , HashMap<String,String>) {
+        let mut interadds_name_logical: HashMap<String,String> = HashMap::new();
+        let mut interadds_logical_name: HashMap<String,String> = HashMap::new();
+        for (name, gate_struct) in self.gates.iter(){
+            if xor_ands.contains_key(name){
+                continue;
+            }
+            let inner = &gate_struct.borrow().predecessors;
+            let a_cin;
+            let b_cin;
+            let a_xa ;
+            let b_xa ;
+            match inner {
+                WireCombo::And { a, b } => {
+                    a_cin = cins.get(a);
+                    b_cin = cins.get(b);
+                    a_xa = xor_ands.get(a);
+                    b_xa = xor_ands.get(b);
+                }
+                _=>{continue;}
+            };
+            match [a_cin, b_cin, a_xa, b_xa] {
+                [Some(a), None, None, Some(b)] => {
+                    debug!("A: {a} B: {b}");
+                    let cin_number = a.split_once("_").unwrap().1.parse::<i32>().unwrap();
+                    let xx_num = b.split_once("_").unwrap().0.trim_matches('x').parse::<i32>().unwrap();
+                    // debug!("Cin number: {cin_number} xx: {xx_num}");
+                    if cin_number == xx_num {
+                        interadds_name_logical.insert(name.clone(), format!("{:0>2}_INTER_ADD", xx_num));
+                        interadds_logical_name.insert(format!("{:0>2}_INTER_ADD", xx_num), name.clone());
+                    }
+                    else {
+                        error!("Number mismatch for {}: {cin_number} != {xx_num}", name)
+                    }
+                }
+                [None, Some(a), Some(b), None] => {
+                    debug!("A: {a} B: {b}");
+                    let cin_number = a.split_once("_").unwrap().1.parse::<i32>().unwrap();
+                    let xx_num = b.split_once("_").unwrap().0.trim_matches('x').parse::<i32>().unwrap();
+                    // debug!("Cin number: {cin_number} xx: {xx_num}");
+                    if cin_number == xx_num {
+                        interadds_name_logical.insert(name.clone(), format!("{:0>2}_INTER_ADD", xx_num));
+                        interadds_logical_name.insert(format!("{:0>2}_INTER_ADD", xx_num), name.clone());
+                    }
+                    else {
+                        error!("Number mismatch for {}: {cin_number} != {xx_num}", name)
+                    }
+                }
+                _ => {
+                    error!("{} Set was AND {:?} ({:?})", name, [a_cin, b_cin, a_xa, b_xa], inner);
+                }
+            }
+        }
+        (interadds_name_logical, interadds_logical_name)
+    }
+
+    pub fn find_couts(&self, inter_ands: &HashMap<String, String>, xor_ands: &HashMap<String, String>) -> (HashMap<String, String>, HashMap<String,String>) {
+        let mut cout_name_logical: HashMap<String,String> = HashMap::new();
+        let mut cout_logical_name: HashMap<String,String> = HashMap::new();
+
+        for (name, gate_struct) in self.gates.iter(){
+            if xor_ands.contains_key(name){
+                continue;
+            }
+            let inner = &gate_struct.borrow().predecessors;
+            let a_ia;
+            let b_ia;
+            let a_xa ;
+            let b_xa ;
+            match inner {
+                WireCombo::Or { a, b } => {
+                    a_ia = inter_ands.get(a);
+                    b_ia = inter_ands.get(b);
+                    a_xa = xor_ands.get(a);
+                    b_xa = xor_ands.get(b);
+                }
+                _=>{continue;}
+            };
+            match [a_ia, b_ia, a_xa, b_xa] {
+                [Some(a), None, None, Some(b)] => {
+                    debug!("A: {a} B: {b}");
+                    let ia_number = a.split_once("_").unwrap().0.parse::<i32>().unwrap();
+                    let xx_num = b.split_once("_").unwrap().0.trim_matches('x').parse::<i32>().unwrap();
+                    // debug!("ia number: {ia_number} xx: {xx_num}");
+                    if ia_number == xx_num {
+                        cout_name_logical.insert(name.clone(), format!("COUT_{:0>2}", xx_num+1));
+                        cout_logical_name.insert(format!("COUT_{:0>2}", xx_num+1), name.clone());
+                    }
+                    else {
+                        error!("Number mismatch for {}: {ia_number} != {xx_num}", name)
+                    }
+                }
+                [None, Some(a), Some(b), None] => {
+                    debug!("A: {a} B: {b}");
+                    let ia_number = a.split_once("_").unwrap().0.parse::<i32>().unwrap();
+                    let xx_num = b.split_once("_").unwrap().0.trim_matches('x').parse::<i32>().unwrap();
+                    // debug!("ia number: {ia_number} xx: {xx_num}");
+                    if ia_number == xx_num {
+                        cout_name_logical.insert(name.clone(), format!("COUT_{:0>2}", xx_num+1));
+                        cout_logical_name.insert(format!("COUT_{:0>2}", xx_num+1), name.clone());
+                    }
+                    else {
+                        error!("Number mismatch for {}: {ia_number} != {xx_num}", name)
+                    }
+                }
+                _ => {
+                    error!("{} Set was AND {:?} ({:?})", name, [a_ia, b_ia, a_xa, b_xa], inner);
+                }
+            }
+        }
+
+        (cout_name_logical, cout_logical_name)
+    }
+
+    pub fn combine_maps(&self, v: Vec<&HashMap<String,String>>) -> (Vec<(String, Vec<String>)>, HashMap<String, Vec<String>>) {
+        let mut comb: HashMap<String, Vec<String>> = HashMap::new();
+        for hm in v.iter() {
+            hm.iter().for_each(|(k, v)| {
+                append_to_hash_map(&mut comb, k.clone(), v.clone());
+            });
+        }
+        let mut out: Vec<(String, Vec<String>)> = Vec::new();
+        for key in comb.keys() {
+            let val = comb.get(key).unwrap().to_owned();
+            out.push((key.clone(), val));
+        }
+        out.sort_by_key(|x| x.0.clone());
+        (out, comb)
+    }
+
+    pub fn find_unsafes(&self, comb_hm: &HashMap<String, Vec<String>>) -> HashSet<String> {
+        let mut pot_swaps: HashSet<String> = HashSet::new();
+        for (key, all_names) in comb_hm.iter() {
+            let mut ani = all_names.iter();
+            let c_in =ani.clone().any(|x| x.starts_with("CIN"));
+            let c_out=ani.clone().any(|x| x.starts_with("COUT"));
+
+            match [c_in, c_out] {
+                [true, true] => {}
+                [false, false] => {
+                    if all_names.len() > 1 {
+                        error!("{key} No c/inout but multiples: {:?}", all_names);
+                    }
+                }
+                _ => {
+                    info!("{key} One c(in|out) {:?}", all_names);
+                    pot_swaps.insert(key.clone());
+                }
+            }
+
+        }
+        info!("Cout only swaps: {:?}", pot_swaps);
+        pot_swaps
+    }
+
+    pub fn re_render(&self, gate_name: &str, combined_map: &HashMap<String,Vec<String>>) {
+        let b = vec!["NO_COOL_NAME".to_string()];
+        let nice_name = combined_map.get(gate_name).unwrap_or(&b);
+        let g = &self.gates.get(gate_name).unwrap().borrow();
+        match &g.predecessors {
+            WireCombo::Or { a, b } => {
+                let aa= a;
+                let bb = b;
+                let a_name = combined_map.get(a).unwrap_or(&vec![aa.clone()]).to_owned();
+                let b_name = combined_map.get(b).unwrap_or(&vec![bb.clone()]).to_owned();
+                info!("{gate_name}: ({:?}) {:?} OR {:?}", nice_name, a_name, b_name);
+            }
+            WireCombo::And { a, b } => {
+                let aa= a;
+                let bb = b;
+                let a_name = combined_map.get(a).unwrap_or(&vec![aa.clone()]).to_owned();
+                let b_name = combined_map.get(b).unwrap_or(&vec![bb.clone()]).to_owned();
+                info!("{gate_name}: ({:?}) {:?} AND {:?}", nice_name, a_name, b_name);
+            }
+            WireCombo::Xor { a, b } => {
+                let aa= a;
+                let bb = b;
+                let a_name = combined_map.get(a).unwrap_or(&vec![aa.clone()]).to_owned();
+                let b_name = combined_map.get(b).unwrap_or(&vec![bb.clone()]).to_owned();
+                info!("{gate_name}: ({:?}) {:?} XOR {:?}", nice_name, a_name, b_name);
+
+            }
+            _ => {}
+        }
+
+
+    }
+
+
+}
+
+fn run_a_check(real_input: &String, swaps: Vec<Vec<&String>>) -> usize {
+    let mut d24 = Day24::new(real_input);
+    d24.parse();
+    for s in swaps.iter() {
+        d24.swap(s[0].as_str(), s[1].as_str());
+    }
+
+
+    d24.check_layers();
+    // if !d24.correct_output() {
+    //     return 12345;
+    // }
+    let name_map = d24.find_input_xor_and_gates();
+    info!("{:#?}", name_map);
+
+    let cin_maps = d24.calculate_cins(&name_map.0);
+    info!("{:#?}", cin_maps);
+
+    let interadd_maps = d24.find_intermediate_ands(&cin_maps.0, &name_map.0);
+    info!("{:#?}", interadd_maps);
+
+    let cout_maps = d24.find_couts(&interadd_maps.0, &name_map.0);
+    info!("{:#?}", cout_maps);
+
+    let combined0 = d24.combine_maps(vec![&name_map.0, &cin_maps.0, &interadd_maps.0, &cout_maps.0]);
+    let combined1= d24.combine_maps(vec![&name_map.1, &cin_maps.1, &interadd_maps.1, &cout_maps.1]);
+
+    info!("{:?}", combined0);
+    for cmb in combined0.0 {
+        info!("{}: {:?}", cmb.0, cmb.1);
+    }
+    for cmb in combined1.0 {
+        info!("{}: {:?}", cmb.0, cmb.1);
+    }
+
+    let p_swaps = d24.find_unsafes(&combined0.1);
+    let of_concern = cin_maps.2;
+    info!("P Swaps: {:?}", p_swaps);
+    info!("Z Swaps: {:?}", of_concern);
+
+    let mut total_swaps: Vec<String> = Vec::new();
+    for p in p_swaps.iter() {
+        if p != "rvh" && p != "z45" {
+            total_swaps.push(p.clone())
         }
     }
+    for p in of_concern.iter() {
+        if p != "rvh" && p != "z45" {
+            total_swaps.push(p.clone())
+        }
+    }
+
+    info!("{} total swap targets: {:?}", total_swaps.len(), total_swaps);
+
+    for s in &total_swaps {
+        d24.re_render(s.as_str(), &combined0.1);
+    }
+
+    total_swaps.len()
 }
 
 fn main() {
@@ -436,26 +768,103 @@ fn main() {
     d24.parse();
     debug!("{:?}", d24);
     d24.single_step();
-    let res = d24.solve_p1();
+    let res = d24.solve_p1().unwrap();
     info!("Answer: {res}");
 
     let mut d24 = Day24::new(&real_input);
     d24.parse();
     debug!("{:?}", d24);
     d24.single_step();
-    let res = d24.solve_p1();
+    let res = d24.solve_p1().unwrap();
     info!("Answer: {res}");
 
-    let mut d24 = Day24::new(&real_input);
-    d24.parse();
-    d24.check_layers();
-    d24.correct_output();
-    d24.get_inputs_per_output_bit();
+    // d24.get_inputs_per_output_bit();
 
     let gv = d24.make_graphviz_graph();
     let mut file = File::create("foo.txt").unwrap();
     file.write_all(gv.as_bytes());
 
+    let mut d24 = Day24::new(&real_input);
+    d24.parse();
+    // d24.swap("jdr", "z31");
+    // d24.swap("pgt", "z22");
+    // d24.swap("ffj", "z08");
+    // d24.swap("gjh", "z22");
+    // d24.swap("jdr", "z31");
+    d24.swap("ffj", "z08");
+    d24.swap("gjh", "z22");
+    d24.swap("jdr", "z31");
+    d24.swap("dwp", "kfm");
+    d24.make_graphviz_graph();
+    d24.check_layers();
+    d24.correct_output();
     let name_map = d24.find_input_xor_and_gates();
     info!("{:#?}", name_map);
+
+    let cin_maps = d24.calculate_cins(&name_map.0);
+    info!("{:#?}", cin_maps);
+
+    let interadd_maps = d24.find_intermediate_ands(&cin_maps.0, &name_map.0);
+    info!("{:#?}", interadd_maps);
+
+    let cout_maps = d24.find_couts(&interadd_maps.0, &name_map.0);
+    info!("{:#?}", cout_maps);
+
+    let combined0 = d24.combine_maps(vec![&name_map.0, &cin_maps.0, &interadd_maps.0, &cout_maps.0]);
+    let combined1= d24.combine_maps(vec![&name_map.1, &cin_maps.1, &interadd_maps.1, &cout_maps.1]);
+
+    info!("{:?}", combined0);
+    for cmb in combined0.0 {
+        info!("{}: {:?}", cmb.0, cmb.1);
+    }
+    for cmb in combined1.0 {
+        info!("{}: {:?}", cmb.0, cmb.1);
+    }
+
+    let p_swaps = d24.find_unsafes(&combined0.1);
+    let of_concern = cin_maps.2;
+    info!("P Swaps: {:?}", p_swaps);
+    info!("Z Swaps: {:?}", of_concern);
+
+    let mut total_swaps: Vec<String> = Vec::new();
+    for p in p_swaps.iter() {
+        if p != "rvh" && p != "z45" {
+            total_swaps.push(p.clone())
+        }
+    }
+    for p in of_concern.iter() {
+        if p != "rvh" && p != "z45" {
+            total_swaps.push(p.clone())
+        }
+    }
+
+    info!("{} total swap targets: {:?}", total_swaps.len(), total_swaps);
+
+    for s in total_swaps.iter() {
+        d24.re_render(s.as_str(), &combined0.1);
+    }
+    // d24.calc_value(start);
+    let out = d24.correct_output();
+    info!("Out: {out}");
+
+    // let mut all_eights = total_swaps.iter().combinations(8);
+    // // let all_keys = d24.gates.keys();
+    // // let mut all_eights = all_keys.combinations(8);
+
+    // for window in all_eights {
+    //     let mut chunks = window.chunks(2);
+    //     let chunks: Vec<Vec<&String>> = chunks.map(|x| {
+    //         Vec::from(x)
+    //     }).collect();
+    //     let wrong = run_a_check(&real_input, chunks.clone());
+    //     if wrong != 12345{
+    //         error!("Window {:?} has {wrong} wrong", window);
+    //     }
+    //     if wrong == 0 {
+    //         return;
+    //     }
+    // }
+
+
+
 }
