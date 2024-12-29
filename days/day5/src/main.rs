@@ -97,7 +97,7 @@ impl Day5 {
         let mut answer: VecDeque<i32> = VecDeque::new();
         let empty_vec: Vec<i32> = Vec::new();
 
-        for (index, val) in v.iter().enumerate() {
+        for (_, val) in v.iter().enumerate() {
             // get all deps and anti deps for val
             let deps = self.deps_list.get(val).unwrap_or(&empty_vec);
             let anti_deps = self.anti_deps_list.get(val).unwrap_or(&empty_vec);
@@ -174,19 +174,19 @@ fn main() {
         .get_input_as_string(RequestedAocInputType::Real)
         .unwrap();
 
-    // let mut d5 = Day5::new(&test_input);
-    // d5.parse();
-    // debug!("Deps: {:?}", d5.deps_list);
-    // debug!("Prints: {:?}", d5.print_list);
-    // let s = d5.find_valid_middle_sum();
-    // info!("Found answer: {s}");
+    let mut d5 = Day5::new(&test_input);
+    d5.parse();
+    debug!("Deps: {:?}", d5.deps_list);
+    debug!("Prints: {:?}", d5.print_list);
+    let s = d5.find_valid_middle_sum();
+    info!("Found answer: {s}");
 
-    // let mut d5 = Day5::new(&real_input);
-    // d5.parse();
-    // debug!("Deps: {:?}", d5.deps_list);
-    // debug!("Prints: {:?}", d5.print_list);
-    // let s = d5.find_valid_middle_sum();
-    // info!("Found answer: {s}");
+    let mut d5 = Day5::new(&real_input);
+    d5.parse();
+    debug!("Deps: {:?}", d5.deps_list);
+    debug!("Prints: {:?}", d5.print_list);
+    let s = d5.find_valid_middle_sum();
+    info!("Found answer: {s}");
 
     let mut d5 = Day5::new(&test_input);
     d5.parse();

@@ -47,7 +47,7 @@ impl Ord for Block {
 impl Day9 {
     pub fn new(s: &String) -> Self {
         let mut heaps: Vec<BinaryHeap<Block>> = Vec::new();
-        for i in 0..10 {
+        for _ in 0..10 {
             heaps.push(BinaryHeap::new())
         }
         Self {
@@ -165,7 +165,7 @@ impl Day9 {
         //     })
         // }
 
-        let sorted_string: String = output_block_list
+        let _sorted_string: String = output_block_list
             .iter()
             .map(|block| {
                 if block.filled {
@@ -284,11 +284,6 @@ fn main() {
     let aoc: AocHelper = AocHelper::new(9, Some(vec!["second_test".to_string()]));
     let test_input = aoc
         .get_input_as_string(RequestedAocInputType::Test)
-        .unwrap();
-    let test2_input = aoc
-        .get_input_as_string(RequestedAocInputType::CustomTest {
-            fname: "second_test".to_string(),
-        })
         .unwrap();
     let real_input = aoc
         .get_input_as_string(RequestedAocInputType::Real)

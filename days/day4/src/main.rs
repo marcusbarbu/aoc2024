@@ -35,7 +35,6 @@ impl Day4 {
         info!("Row count: {} len: {}", row_count, row_len);
 
         let dimension = row_count.max(row_len);
-        let diag_dimension = 2 * dimension;
         debug!("Dim: {dimension}");
 
         let empty_vec: Vec<char> = vec!['*'; dimension];

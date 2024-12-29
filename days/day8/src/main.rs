@@ -1,4 +1,3 @@
-use rayon::prelude::*;
 use std::collections::{BTreeMap, BTreeSet};
 
 use aoc2024::{AocHelper, RequestedAocInputType};
@@ -10,7 +9,7 @@ struct Day8 {
     antenna_locations: BTreeMap<char, Vec<(i32, i32)>>,
     num_rows: usize,
     num_cols: usize,
-    antinodes: BTreeSet<Point>,
+    _antinodes: BTreeSet<Point>,
     freqs: BTreeMap<char, Frequency>,
 }
 
@@ -19,7 +18,7 @@ type PointPair = ((i32, i32), (i32, i32));
 
 #[derive(Debug)]
 struct Frequency {
-    name: char,
+    _name: char,
     arms: Vec<FrequencyArms>,
 }
 
@@ -28,7 +27,7 @@ struct FrequencyArms {
     root: Point,
     first_point: Point,
     potential_points: Vec<Point>,
-    antinode_points: Vec<Point>,
+    _antinode_points: Vec<Point>,
 }
 
 impl Day8 {
@@ -38,7 +37,7 @@ impl Day8 {
             antenna_locations: BTreeMap::new(),
             num_cols: 0,
             num_rows: 0,
-            antinodes: BTreeSet::new(),
+            _antinodes: BTreeSet::new(),
             freqs: BTreeMap::new(),
         }
     }
@@ -138,7 +137,7 @@ impl Day8 {
         self.antenna_locations.iter().for_each(|(signal, loc_vec)| {
             let pairs = Day8::generate_pairs(loc_vec);
             let mut freq: Frequency = Frequency {
-                name: *signal,
+                _name: *signal,
                 arms: Vec::new(),
             };
             debug!("Pairs for {signal}: {:?}", pairs);
@@ -149,7 +148,7 @@ impl Day8 {
                     root: ele.0,
                     first_point: ele.1,
                     potential_points: points,
-                    antinode_points: Vec::new(),
+                    _antinode_points: Vec::new(),
                 };
                 freq.arms.push(fa);
             }
@@ -159,7 +158,7 @@ impl Day8 {
 
     pub fn calculate_antinodes(&mut self) -> BTreeSet<Point> {
         let mut universal_antinodes: BTreeSet<Point> = BTreeSet::new();
-        self.freqs.iter().for_each(|(key, freq)| {
+        self.freqs.iter().for_each(|(_key, freq)| {
             for arm in freq.arms.iter() {
                 // let arm_antinodes: Vec<(i32,i32)> =
                 arm.potential_points
@@ -188,7 +187,7 @@ impl Day8 {
     pub fn get_total_line_points(&self) -> BTreeSet<Point> {
         let mut out: BTreeSet<Point> = BTreeSet::new();
 
-        self.freqs.iter().for_each(|(name, freq)| {
+        self.freqs.iter().for_each(|(_, freq)| {
             freq.arms.iter().for_each(|arm| {
                 arm.potential_points.iter().for_each(|point| {
                     out.insert((point.0, point.1));

@@ -17,7 +17,7 @@ struct Day10 {
 
 #[derive(Clone, Debug)]
 struct Answer {
-    path: Vec<Point>,
+    _path: Vec<Point>,
     endpoint: Point,
 }
 
@@ -84,7 +84,7 @@ impl Day10 {
 
         if *height == 9 {
             let ans = Answer {
-                path: _visited,
+                _path: _visited,
                 endpoint: cur_point,
             };
 
